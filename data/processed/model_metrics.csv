@@ -1,3 +1,3 @@
 model,model_label,n_records,n_features,excluded_features,mae,r2
-full_model,Full model: all numeric predictors,777,17,None,123.74604694184896,0.986859256076879
-pre_harvest_model,Pre-harvest model: excluding fruit traits,777,14,"fruitset, fruitmass, seeds",270.906926402296,0.8989864974382157
+full_model,Full model: all numeric predictors,777,16,None,122.59511758237197,0.9870357588353097
+pre_harvest_model,Pre-harvest model: excluding fruit traits,777,13,"fruitset, fruitmass, seeds",256.5741950582131,0.912726231246789

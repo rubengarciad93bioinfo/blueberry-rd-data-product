@@ -17,7 +17,7 @@ TARGET = "yield"
 # These variables are biologically close to the final crop outcome.
 # They are useful for explaining yield, but may be inappropriate for early prediction.
 OUTCOME_ADJACENT_FEATURES = ["fruitset", "fruitmass", "seeds"]
-
+ID_OR_INDEX_FEATURES = ["simulation_id", "row#", "row", "index"]
 
 def train_yield_model(df: pd.DataFrame, model_name: str, model_label: str, excluded_features=None):
     if excluded_features is None:
@@ -26,9 +26,11 @@ def train_yield_model(df: pd.DataFrame, model_name: str, model_label: str, exclu
     numeric_df = df.select_dtypes(include="number").copy()
 
     feature_cols = [
-        col for col in numeric_df.columns
-        if col not in ["simulation_id", TARGET] and col not in excluded_features
-    ]
+    	col for col in numeric_df.columns
+    	if col not in ID_OR_INDEX_FEATURES
+    	and col != TARGET
+    	and col not in excluded_features
+	]
 
     if not feature_cols:
         raise ValueError(f"No features available for model {model_name}")

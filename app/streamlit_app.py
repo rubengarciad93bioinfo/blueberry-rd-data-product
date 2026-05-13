@@ -136,7 +136,7 @@ DATA_DICTIONARY = [
 
 
 OUTCOME_ADJACENT_FEATURES = {"fruitset", "fruitmass", "seeds"}
-
+ID_OR_INDEX_FEATURES = {"simulation_id", "row#", "row", "index"}
 
 st.set_page_config(
     page_title="Blueberry R&D Data Product",
@@ -263,7 +263,8 @@ numeric_yield_columns = yield_df.select_dtypes(include="number").columns.tolist(
 
 feature_options = [
     col for col in numeric_yield_columns
-    if col not in ["simulation_id", "yield"]
+    if col not in ID_OR_INDEX_FEATURES
+    and col != "yield"
 ]
 
 selected_feature = st.sidebar.selectbox(
@@ -310,7 +311,18 @@ selected_metrics = metrics_df.loc[metrics_df["model"] == selected_model].iloc[0]
 selected_importance = importance_df.loc[
     importance_df["model"] == selected_model
 ].sort_values("importance", ascending=False)
+if selected_importance.empty and selected_model == "RandomForestRegressor":
+    selected_model_for_importance = "full_model"
+    selected_importance = importance_df.loc[
+        importance_df["model"] == selected_model_for_importance
+    ].sort_values("importance", ascending=False)
 
+if selected_importance.empty and "model_label" in importance_df.columns:
+    selected_label = model_labels.get(selected_model)
+
+    selected_importance = importance_df.loc[
+        importance_df["model_label"] == selected_label
+    ].sort_values("importance", ascending=False)
 model_r2 = selected_metrics["r2"]
 model_mae = selected_metrics["mae"]
 
