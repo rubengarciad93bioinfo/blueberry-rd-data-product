@@ -1,0 +1,2 @@
+model,n_records,n_features,mae,r2
+RandomForestRegressor,777,17,123.74604694184896,0.986859256076879

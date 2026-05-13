@@ -1,0 +1,6 @@
+check,result,expected,status
+No missing yield values,0,0,PASS
+No negative yield values,0,0,PASS
+No missing weather dates,0,0,PASS
+No impossible daily max temperature,0,0,PASS
+No negative precipitation,0,0,PASS
