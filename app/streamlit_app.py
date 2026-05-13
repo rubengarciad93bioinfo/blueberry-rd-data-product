@@ -197,11 +197,30 @@ importance_df = load_csv(IMPORTANCE_PATH)
 
 if "model" not in metrics_df.columns:
     metrics_df["model"] = "full_model"
-    metrics_df["model_label"] = "Full model"
+
+if "model_label" not in metrics_df.columns:
+    metrics_df["model_label"] = metrics_df["model"].replace(
+        {
+            "full_model": "Full model: all numeric predictors",
+            "pre_harvest_model": "Pre-harvest model: excluding fruit traits",
+            "RandomForestRegressor": "Random forest model",
+        }
+    )
+
+if "excluded_features" not in metrics_df.columns:
+    metrics_df["excluded_features"] = "Not available"
 
 if "model" not in importance_df.columns:
     importance_df["model"] = "full_model"
-    importance_df["model_label"] = "Full model"
+
+if "model_label" not in importance_df.columns:
+    importance_df["model_label"] = importance_df["model"].replace(
+        {
+            "full_model": "Full model: all numeric predictors",
+            "pre_harvest_model": "Pre-harvest model: excluding fruit traits",
+            "RandomForestRegressor": "Random forest model",
+        }
+    )
 
 if "date" in weather_df.columns:
     weather_df["date"] = pd.to_datetime(weather_df["date"])
