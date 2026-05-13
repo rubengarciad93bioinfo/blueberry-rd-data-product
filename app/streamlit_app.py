@@ -167,8 +167,14 @@ def is_discrete_like(series: pd.Series, max_unique: int = 12) -> bool:
     return series.nunique(dropna=True) <= max_unique
 
 
+def file_mtime(path: Path) -> float:
+    if not path.exists():
+        return 0.0
+    return path.stat().st_mtime
+
+
 @st.cache_data
-def load_table(table_name: str) -> pd.DataFrame:
+def load_table(table_name: str, db_mtime: float) -> pd.DataFrame:
     if not DB_PATH.exists():
         st.error(f"Database not found: {DB_PATH}")
         st.stop()
@@ -181,7 +187,7 @@ def load_table(table_name: str) -> pd.DataFrame:
 
 
 @st.cache_data
-def load_csv(path: Path) -> pd.DataFrame:
+def load_csv(path: Path, csv_mtime: float) -> pd.DataFrame:
     if not path.exists():
         st.error(f"Required file not found: {path}")
         st.stop()
@@ -189,11 +195,39 @@ def load_csv(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-yield_df = load_table("blueberry_yield")
-weather_df = load_table("weather_daily")
-quality_df = load_csv(QUALITY_PATH)
-metrics_df = load_csv(METRICS_PATH)
-importance_df = load_csv(IMPORTANCE_PATH)
+def file_mtime(path: Path) -> float:
+    if not path.exists():
+        return 0.0
+    return path.stat().st_mtime
+
+
+@st.cache_data
+def load_table(table_name: str, db_mtime: float) -> pd.DataFrame:
+    if not DB_PATH.exists():
+        st.error(f"Database not found: {DB_PATH}")
+        st.stop()
+
+    con = duckdb.connect(str(DB_PATH))
+    df = con.execute(f"SELECT * FROM {table_name}").fetchdf()
+    con.close()
+
+    return df
+
+
+@st.cache_data
+def load_csv(path: Path, csv_mtime: float) -> pd.DataFrame:
+    if not path.exists():
+        st.error(f"Required file not found: {path}")
+        st.stop()
+
+    return pd.read_csv(path)
+
+
+yield_df = load_table("blueberry_yield", file_mtime(DB_PATH))
+weather_df = load_table("weather_daily", file_mtime(DB_PATH))
+quality_df = load_csv(QUALITY_PATH, file_mtime(QUALITY_PATH))
+metrics_df = load_csv(METRICS_PATH, file_mtime(METRICS_PATH))
+importance_df = load_csv(IMPORTANCE_PATH, file_mtime(IMPORTANCE_PATH))
 
 if "model" not in metrics_df.columns:
     metrics_df["model"] = "full_model"
@@ -258,7 +292,9 @@ with st.expander("Project context"):
 
 
 st.sidebar.header("Dashboard controls")
-
+st.sidebar.caption(
+    f"Model output version: {pd.to_datetime(file_mtime(METRICS_PATH), unit='s')}"
+)
 numeric_yield_columns = yield_df.select_dtypes(include="number").columns.tolist()
 
 feature_options = [
